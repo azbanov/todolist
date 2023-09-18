@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: db_todo
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports: 
+      - 5432:5432
+    volumes:
+      - ./data:/pgdata:/var/lib/postgresql/data
+    networks: 
+      - todo
+
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+    networks: 
+      - todo
+
+networks:
+  todo:
+    external: true

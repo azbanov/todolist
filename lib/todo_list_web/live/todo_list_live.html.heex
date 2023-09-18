@@ -1,0 +1,123 @@
+<.header>
+    Listing Tasks
+    <:actions>
+    <.button phx-click={open_create_modal()}>
+        New Task
+    </.button>
+    </:actions>
+</.header>
+
+<.table id="tasks" rows={@tasks} row_click={&JS.navigate(~p"/tasks/#{&1}")}>
+    <:col :let={task} label="Title"><%= task.title %></:col>
+    <:col :let={task} label="Description"><%= task.description %></:col>
+    <:col :let={task} label="User"><%= task.user.email %></:col>
+    <:col :let={task} label="Priority"><%= task.priority %></:col>
+    <:col :let={task} label="Dead line"><%= task.dead_line %></:col>
+    <:action :let={task}>
+        <div class="sr-only">
+            <.link navigate={~p"/tasks/#{task}"}>Show</.link>
+        </div>
+        <button phx-click={open_edit_modal(task.id)}>
+            <TodoListWeb.CoreComponents.icon name="hero-pencil-square-solid" class="mr-2" />
+        </button>
+    </:action>
+    <:action :let={task}>
+        <button phx-click="delete_task" phx-value-task_id={task.id}>
+            <TodoListWeb.CoreComponents.icon name="hero-trash-solid" class="mr-2" />
+        </button>
+    </:action>
+</.table>
+
+<TodoListWeb.CoreComponents.modal id="edit_modal">
+    <h2>Edit task <b><%= @edit_form[:id].value %></b></h2>
+    <TodoListWeb.CoreComponents.simple_form for={@edit_form} phx-submit="edit_task">
+        <%= Phoenix.HTML.Form.hidden_input(@edit_form, :id, id: "task_id") %>
+        <TodoListWeb.CoreComponents.input
+            id="edit_title"
+            label="Title"
+            field={@edit_form[:title]}
+            value={@edit_form[:title].value}
+        />
+        <TodoListWeb.CoreComponents.input
+            id="edit_description"
+            label="Description"
+            type="textarea"
+            field={@edit_form[:description]}
+            value={@edit_form[:description].value}
+        />
+        <TodoListWeb.CoreComponents.input
+            id="edit_user"
+            label="User"
+            type="select"
+            field={@edit_form[:user_id]}
+            options={user_opts()}
+            value={@edit_form[:user_id].value}
+        />
+        <TodoListWeb.CoreComponents.input
+            id="edit_priority"
+            label="Priority"
+            type="select"
+            field={@edit_form[:priority]}
+            options={Ecto.Enum.values(TodoList.TaskList.Task, :priority)}
+            value={@edit_form[:priority].value}
+        />
+        <TodoListWeb.CoreComponents.input
+            id="edit_deadline"
+            label="Dead Line"
+            field={@edit_form[:dead_line]}
+            type="datetime-local"
+            value={@edit_form[:dead_line].value}
+        />
+        <:actions>
+          <TodoListWeb.CoreComponents.button>
+            Save
+          </TodoListWeb.CoreComponents.button>
+        </:actions>
+    </TodoListWeb.CoreComponents.simple_form>
+</TodoListWeb.CoreComponents.modal>
+
+<TodoListWeb.CoreComponents.modal id="create_modal">
+    <h2>Create a task</h2>
+    <TodoListWeb.CoreComponents.simple_form for={@create_form} phx-submit="create_task">
+        <TodoListWeb.CoreComponents.input
+            id="title"
+            label="Title"
+            field={@create_form[:title]}
+        />
+        <TodoListWeb.CoreComponents.input
+            id="description"
+            label="Description"
+            type="textarea"
+            field={@create_form[:description]}
+        />
+        <TodoListWeb.CoreComponents.input
+            id="user"
+            label="User"
+            type="select"
+            field={@create_form[:user_id]}
+            options={user_opts()}
+            value={@current_user.id}
+        />
+        <TodoListWeb.CoreComponents.input
+            id="priority"
+            label="Priority"
+            type="select"
+            field={@create_form[:priority]}
+            options={Ecto.Enum.values(TodoList.TaskList.Task, :priority)}
+        />
+        <TodoListWeb.CoreComponents.input
+            id="deadline"
+            label="Dead Line"
+            field={@create_form[:dead_line]}
+            type="datetime-local"
+        />
+
+        <%= live_file_input @uploads.documents %>
+        
+        <:actions>
+          <TodoListWeb.CoreComponents.button>
+            Submit
+          </TodoListWeb.CoreComponents.button>
+        </:actions>
+    </TodoListWeb.CoreComponents.simple_form>
+</TodoListWeb.CoreComponents.modal>

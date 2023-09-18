@@ -1,0 +1,41 @@
+<.back navigate={~p"/tasks"}>Back to tasks</.back><br/>
+
+<.header>
+  Task <%= @task.id %>
+</.header>
+
+<.list>
+  <:item title="Title"><%= @task.title %></:item>
+  <:item title="Description"><%= @task.description %></:item>
+  <:item title="User"><%= @task.user.email %></:item>
+  <:item title="Priority"><%= @task.priority %></:item>
+  <:item title="Dead line"><%= @task.dead_line %></:item>
+</.list>
+
+
+<br/>
+<br/>
+<div :if={@task.comments}>
+Comments: 
+    <%= for comment <- @task.comments do %>
+        <div>
+            <p><b><%= comment.user.email %></b>: <%= comment.comment %></p>
+        </div>
+    <% end %>
+</div>
+
+<TodoListWeb.CoreComponents.simple_form for={@create_comment} phx-submit="create_comment">
+    <%= Phoenix.HTML.Form.hidden_input(@create_comment, :task_id, value: Integer.to_string(@task.id)) %>
+    <%= Phoenix.HTML.Form.hidden_input(@create_comment, :user_id, value: Integer.to_string(@current_user.id)) %>
+    <TodoListWeb.CoreComponents.input
+        id="comment"
+        label="Comment"
+        field={@create_comment[:comment]}
+    />
+    <:actions>
+          <TodoListWeb.CoreComponents.button>
+            Submit
+          </TodoListWeb.CoreComponents.button>
+        </:actions>
+</TodoListWeb.CoreComponents.simple_form>
+
