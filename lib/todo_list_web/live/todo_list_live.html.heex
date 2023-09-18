@@ -78,7 +78,7 @@
 
 <TodoListWeb.CoreComponents.modal id="create_modal">
     <h2>Create a task</h2>
-    <TodoListWeb.CoreComponents.simple_form for={@create_form} phx-submit="create_task">
+    <TodoListWeb.CoreComponents.simple_form for={@create_form} phx-submit="create_task" phx-change="validate">
         <TodoListWeb.CoreComponents.input
             id="title"
             label="Title"
@@ -112,7 +112,12 @@
             type="datetime-local"
         />
 
-        <%= live_file_input @uploads.documents %>
+        <.live_file_input upload={@uploads.documents} />
+        <div class="mt-4">
+            <.error :for={err <- upload_errors(@uploads.documents)}>
+            <%= Phoenix.Naming.humanize(err) %>
+            </.error>
+        </div>
         
         <:actions>
           <TodoListWeb.CoreComponents.button>

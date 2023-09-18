@@ -100,6 +100,13 @@ defmodule TodoListWeb.TodoListLive do
   end
 
   def handle_event("create_task", %{"task" => task}, socket) do
+    uploaded_files =
+      consume_uploaded_entries(socket, :documents, fn %{path: path}, _entry ->
+        dest = Path.join("priv/static/uploads", Path.basename(path))
+        File.cp!(path, dest)
+        {:ok, ~p"/uploads/#{Path.basename(dest)}"}
+      end)
+
     
     case TaskList.create_task(task) do
       {:error, message} ->
@@ -119,6 +126,15 @@ defmodule TodoListWeb.TodoListLive do
 
         {:noreply, socket}
     end
+  end
+
+  @impl true
+  def handle_event("validate", %{"task" => task_params} = params, socket) do
+    changeset =
+      Phoenix.Component.to_form(TaskList.create_changeset(task_params))
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign(socket, :create_form, to_form(changeset))}
   end
 
   @impl true

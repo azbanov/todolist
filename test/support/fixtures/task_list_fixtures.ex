@@ -42,4 +42,18 @@ defmodule TodoList.TaskListFixtures do
 
     comment
   end
+
+  @doc """
+  Generate a document.
+  """
+  def document_fixture(attrs \\ %{}) do
+    {:ok, document} =
+      attrs
+      |> Enum.into(%{
+        path: "some path"
+      })
+      |> TodoList.TaskList.create_document()
+
+    document
+  end
 end

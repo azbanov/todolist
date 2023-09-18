@@ -118,4 +118,58 @@ defmodule TodoList.TaskListTest do
       assert %Ecto.Changeset{} = TaskList.change_comment(comment)
     end
   end
+
+  describe "documents" do
+    alias TodoList.TaskList.Document
+
+    import TodoList.TaskListFixtures
+
+    @invalid_attrs %{path: nil}
+
+    test "list_documents/0 returns all documents" do
+      document = document_fixture()
+      assert TaskList.list_documents() == [document]
+    end
+
+    test "get_document!/1 returns the document with given id" do
+      document = document_fixture()
+      assert TaskList.get_document!(document.id) == document
+    end
+
+    test "create_document/1 with valid data creates a document" do
+      valid_attrs = %{path: "some path"}
+
+      assert {:ok, %Document{} = document} = TaskList.create_document(valid_attrs)
+      assert document.path == "some path"
+    end
+
+    test "create_document/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = TaskList.create_document(@invalid_attrs)
+    end
+
+    test "update_document/2 with valid data updates the document" do
+      document = document_fixture()
+      update_attrs = %{path: "some updated path"}
+
+      assert {:ok, %Document{} = document} = TaskList.update_document(document, update_attrs)
+      assert document.path == "some updated path"
+    end
+
+    test "update_document/2 with invalid data returns error changeset" do
+      document = document_fixture()
+      assert {:error, %Ecto.Changeset{}} = TaskList.update_document(document, @invalid_attrs)
+      assert document == TaskList.get_document!(document.id)
+    end
+
+    test "delete_document/1 deletes the document" do
+      document = document_fixture()
+      assert {:ok, %Document{}} = TaskList.delete_document(document)
+      assert_raise Ecto.NoResultsError, fn -> TaskList.get_document!(document.id) end
+    end
+
+    test "change_document/1 returns a document changeset" do
+      document = document_fixture()
+      assert %Ecto.Changeset{} = TaskList.change_document(document)
+    end
+  end
 end
