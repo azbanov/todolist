@@ -8,7 +8,7 @@ defmodule TodoList.TaskListFixtures do
   Generate a unique task user_uuid.
   """
   def unique_task_user_uuid do
-    raise "implement the logic to generate a unique task user_uuid"
+    "asdfasdfasdfatq3rfaqwe2w3453twer"
   end
 
   @doc """
@@ -18,10 +18,10 @@ defmodule TodoList.TaskListFixtures do
     {:ok, task} =
       attrs
       |> Enum.into(%{
-        priority: "some priority",
+        priority: "High",
         description: "some description",
         title: "some title",
-        user_uuid: unique_task_user_uuid(),
+        user_id: 1,
         dead_line: ~N[2023-09-13 14:53:00]
       })
       |> TodoList.TaskList.create_task()

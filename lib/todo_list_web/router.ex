@@ -72,8 +72,6 @@ defmodule TodoListWeb.Router do
       live "/tasks", TodoListLive, :index
       live "/tasks/:task_id", TaskLive, :index
     end
-
-    # resources "/tasks", TaskController
   end
 
   scope "/", TodoListWeb do

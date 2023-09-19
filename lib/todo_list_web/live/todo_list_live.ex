@@ -7,20 +7,6 @@ defmodule TodoListWeb.TodoListLive do
 
   @todo_list_topic "todo_list"
 
-  @impl true
-  def mount(_params, _session, socket) do
-    if connected?(socket), do: TodoListWeb.Endpoint.subscribe(@todo_list_topic)
-
-    default_assigns = %{
-      tasks: TaskList.list_tasks,
-      edit_form: Phoenix.Component.to_form(TaskList.create_changeset(%{})),
-      create_form: Phoenix.Component.to_form(TaskList.create_changeset(%{}))
-    }
-    {:ok, socket
-      |> assign(default_assigns)
-      |> allow_upload(:documents, accept: ~w(.pdf .doc .docx), max_entries: 5)}
-  end
-
   def user_opts() do
     for user <- TodoList.Accounts.get_users!() do
       [key: user.email, value: user.id]
@@ -37,6 +23,22 @@ defmodule TodoListWeb.TodoListLive do
     %JS{}
     |> JS.push("open_create_modal")
     |> TodoListWeb.CoreComponents.show_modal("create_modal")
+  end
+
+  @impl true
+  def mount(_params, _session, socket) do
+    if connected?(socket), do: TodoListWeb.Endpoint.subscribe(@todo_list_topic)
+
+    default_assigns = %{
+      tasks: TaskList.list_tasks,
+      edit_form: Phoenix.Component.to_form(TaskList.create_changeset(%{})),
+      create_form: Phoenix.Component.to_form(TaskList.create_changeset(%{})),
+      filter_form: Phoenix.Component.to_form(%{})
+    }
+
+    {:ok, socket
+      |> assign(default_assigns)
+      |> allow_upload(:documents, accept: ~w(.pdf .doc .docx), max_entries: 5)}
   end
 
   @impl true
@@ -91,6 +93,7 @@ defmodule TodoListWeb.TodoListLive do
     end
   end
 
+  @impl true
   def handle_event("open_create_modal", _, socket) do
     new_assigns = %{
       create_form: Phoenix.Component.to_form(TaskList.create_changeset(%{}))
@@ -99,8 +102,12 @@ defmodule TodoListWeb.TodoListLive do
     {:noreply, assign(socket, new_assigns)}
   end
 
+  @impl true
   def handle_event("create_task", %{"task" => task}, socket) do
-    
+    uploaded_docs = handle_documents(socket)
+
+    task = Map.put(task, "documents", uploaded_docs)
+
     case TaskList.create_task(task) do
       {:error, message} ->
         {:noreply, socket |> put_flash(:error, inspect(message))}
@@ -122,6 +129,32 @@ defmodule TodoListWeb.TodoListLive do
   end
 
   @impl true
+  def handle_event("validate", %{"task" => task_params}, socket) do
+    changeset =
+      Phoenix.Component.to_form(TaskList.create_changeset(task_params))
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign(socket, :create_form, to_form(changeset))}
+  end
+
+  @impl true
+  def handle_event("cancel_upload", %{"ref" => ref}, socket) do
+    {:noreply, cancel_upload(socket, :documents, ref)}
+  end
+
+  @impl true
+  def handle_event("filter_by_priority", %{"priority" => "All"}, socket) do
+    tasks = TaskList.list_tasks()
+    {:noreply, assign(socket, tasks: tasks)}
+  end
+
+  @impl true
+  def handle_event("filter_by_priority", %{"priority" => priority}, socket) do
+    tasks = TaskList.lists_tasks_by_priority(priority)
+    {:noreply, assign(socket, tasks: tasks)}
+  end
+
+  @impl true
   def handle_event(event, params, socket) do
     Logger.error("unrecognised event: #{event} with params: #{inspect(params)}")
     {:noreply, socket}
@@ -134,5 +167,13 @@ defmodule TodoListWeb.TodoListLive do
 
   defp get_task(tasks, task_id) do
     Enum.find(tasks, &(&1.id == task_id))
+  end
+
+  defp handle_documents(socket) do
+    consume_uploaded_entries(socket, :documents, fn %{path: path}, entry ->
+      dest = Path.join([:code.priv_dir(:todo_list), "static", "uploads", entry.client_name])
+      File.cp!(path, dest)
+      {:ok, ~p"/uploads/#{Path.basename(dest)}"}
+    end)
   end
 end

@@ -10,7 +10,20 @@
   <:item title="User"><%= @task.user.email %></:item>
   <:item title="Priority"><%= @task.priority %></:item>
   <:item title="Dead line"><%= @task.dead_line %></:item>
+  <:item title="Completed"><%= @task.completed %></:item>
 </.list>
+
+<div :if={length(@task.documents) > 0} class="mt-4">
+    <.label>Documents</.label>
+    <div class="grid justify-center md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-7 my-10">
+        <figure
+        :for={document <- @task.documents}
+        class="rounded-lg border shadow-md max-w-xs md:max-w-none"
+        >
+        <a href={document} download><img src={document} alt={Path.basename(document)}></a>
+        </figure>
+    </div>
+</div>
 
 
 <br/>
