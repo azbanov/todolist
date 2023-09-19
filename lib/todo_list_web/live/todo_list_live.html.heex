@@ -13,6 +13,7 @@
     <:col :let={task} label="User"><%= task.user.email %></:col>
     <:col :let={task} label="Priority"><%= task.priority %></:col>
     <:col :let={task} label="Dead line"><%= task.dead_line %></:col>
+    <:col :let={task} label="Completed"><%= task.completed %></:col>
     <:action :let={task}>
         <div class="sr-only">
             <.link navigate={~p"/tasks/#{task}"}>Show</.link>
@@ -68,6 +69,25 @@
             type="datetime-local"
             value={@edit_form[:dead_line].value}
         />
+        <TodoListWeb.CoreComponents.input 
+            id="edit_completed"
+            label="Completed"
+            field={@edit_form[:completed]}
+            type="checkbox"
+        />
+
+        <div :if={@edit_form[:documents].value != nil} class="mt-4">
+            <.label>Documents</.label>
+            <div class="grid justify-center md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-7 my-10">
+                <figure
+                :for={document <- @edit_form[:documents].value}
+                class="rounded-lg border shadow-md max-w-xs md:max-w-none"
+                >
+                <a href={document} download><img src={document} alt={Path.basename(document)}></a>
+                </figure>
+            </div>
+        </div>
+        
         <:actions>
           <TodoListWeb.CoreComponents.button>
             Save
@@ -111,12 +131,45 @@
             field={@create_form[:dead_line]}
             type="datetime-local"
         />
+        <TodoListWeb.CoreComponents.input
+            id="completed"
+            label="Completed"
+            field={@create_form[:completed]}
+            type="checkbox"
+            disabled
+        />
 
         <.live_file_input upload={@uploads.documents} />
         <div class="mt-4">
             <.error :for={err <- upload_errors(@uploads.documents)}>
             <%= Phoenix.Naming.humanize(err) %>
             </.error>
+        </div>
+
+        <div class="mt-4 flex flex-row flex-wrap justify-start content-start items-start gap-2">
+            <div
+            :for={entry <- @uploads.documents.entries}
+            class="flex flex-col items-center justify-start space-y-1"
+            >
+                <div class="w-32 h-32 overflow-clip">
+                    <.live_img_preview entry={entry} />
+                </div>
+
+                <div class="w-full">
+                    <div class="mb-2 text-xs font-semibold inline-block text-slate-600">
+                    <%= entry.progress %>%
+                    </div>
+                    <div class="flex h-2 overflow-hidden text-base bg-slate-200 rounded-lg mb-2">
+                    <span style={"width: #{entry.progress}%"} class="shadow-md bg-slate-500"></span>
+                    </div>
+                    <.error :for={err <- upload_errors(@uploads.documents, entry)}>
+                    <%= Phoenix.Naming.humanize(err) %>
+                    </.error>
+                </div>
+                <a phx-click="cancel_upload" phx-value-ref={entry.ref}>
+                    <.icon name="hero-trash" />
+                </a>
+            </div>
         </div>
         
         <:actions>

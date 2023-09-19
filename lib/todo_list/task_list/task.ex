@@ -7,10 +7,11 @@ defmodule TodoList.TaskList.Task do
     field :description, :string
     field :title, :string
     field :dead_line, :naive_datetime
+    field :completed, :boolean, default: false
+    field :documents, {:array, :string}
 
     belongs_to :user, TodoList.Accounts.User
     has_many :comments, TodoList.TaskList.Comment
-    has_many :documents, TodoList.TaskList.Document
 
     timestamps()
   end
@@ -18,14 +19,14 @@ defmodule TodoList.TaskList.Task do
   @doc false
   def changeset(task, attrs) do
     task
-    |> cast(attrs, [:title, :description, :user_id, :priority, :dead_line])
-    |> validate_required([:title, :description, :user_id, :priority, :dead_line])
+    |> cast(attrs, [:title, :description, :user_id, :priority, :dead_line, :completed, :documents])
+    |> validate_required([:title, :description, :user_id, :priority, :dead_line, :completed])
   end
 
   @doc false
   def create_changeset(attrs) do
     %__MODULE__{}
-    |> cast(attrs, [:title, :description, :user_id, :priority, :dead_line])
-    |> validate_required([:title, :description, :user_id, :priority, :dead_line])
+    |> cast(attrs, [:title, :description, :user_id, :priority, :dead_line, :completed, :documents])
+    |> validate_required([:title, :description, :user_id, :priority, :dead_line, :completed])
   end
 end
