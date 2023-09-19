@@ -3,7 +3,7 @@ defmodule TodoList.TaskList.Task do
   import Ecto.Changeset
 
   schema "tasks" do
-    field :priority, Ecto.Enum, values: [:Low, :Medium, :High]
+    field :priority, Ecto.Enum, values: [:High, :Medium, :Low]
     field :description, :string
     field :title, :string
     field :dead_line, :naive_datetime

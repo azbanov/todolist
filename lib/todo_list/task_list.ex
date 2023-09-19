@@ -18,7 +18,28 @@ defmodule TodoList.TaskList do
 
   """
   def list_tasks do
-    Repo.all(Task) |> Repo.preload(:user)
+    Task
+    |> order_by(asc: :priority)
+    |> Repo.all()
+    |> Repo.preload(:user)
+  end
+
+  @doc """
+  Returns the list of tasks by priority.
+
+  ## Examples
+
+      iex> list_tasks_by_priority(priority)
+      [%Task{}, ...]
+
+  """
+  def lists_tasks_by_priority(priority) do
+    query = from t in Task,
+      where: t.priority == ^priority,
+      order_by: [desc: t.inserted_at]
+
+    Repo.all(query)
+    |> Repo.preload(:user)
   end
 
   @doc """

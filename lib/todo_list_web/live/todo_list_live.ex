@@ -14,7 +14,8 @@ defmodule TodoListWeb.TodoListLive do
     default_assigns = %{
       tasks: TaskList.list_tasks,
       edit_form: Phoenix.Component.to_form(TaskList.create_changeset(%{})),
-      create_form: Phoenix.Component.to_form(TaskList.create_changeset(%{}))
+      create_form: Phoenix.Component.to_form(TaskList.create_changeset(%{})),
+      filter_form: Phoenix.Component.to_form(%{})
     }
     {:ok, socket
       |> assign(default_assigns)
@@ -136,6 +137,16 @@ defmodule TodoListWeb.TodoListLive do
   @impl true
   def handle_event("cancel_upload", %{"ref" => ref}, socket) do
     {:noreply, cancel_upload(socket, :documents, ref)}
+  end
+
+  def handle_event("filter_by_priority", %{"priority" => "All"}, socket) do
+    tasks = TaskList.list_tasks()
+    {:noreply, assign(socket, tasks: tasks)}
+  end
+
+  def handle_event("filter_by_priority", %{"priority" => priority}, socket) do
+    tasks = TaskList.lists_tasks_by_priority(priority)
+    {:noreply, assign(socket, tasks: tasks)}
   end
 
   @impl true
