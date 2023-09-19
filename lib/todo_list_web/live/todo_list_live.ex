@@ -7,21 +7,6 @@ defmodule TodoListWeb.TodoListLive do
 
   @todo_list_topic "todo_list"
 
-  @impl true
-  def mount(_params, _session, socket) do
-    if connected?(socket), do: TodoListWeb.Endpoint.subscribe(@todo_list_topic)
-
-    default_assigns = %{
-      tasks: TaskList.list_tasks,
-      edit_form: Phoenix.Component.to_form(TaskList.create_changeset(%{})),
-      create_form: Phoenix.Component.to_form(TaskList.create_changeset(%{})),
-      filter_form: Phoenix.Component.to_form(%{})
-    }
-    {:ok, socket
-      |> assign(default_assigns)
-      |> allow_upload(:documents, accept: ~w(.pdf .doc .docx), max_entries: 5)}
-  end
-
   def user_opts() do
     for user <- TodoList.Accounts.get_users!() do
       [key: user.email, value: user.id]
@@ -38,6 +23,22 @@ defmodule TodoListWeb.TodoListLive do
     %JS{}
     |> JS.push("open_create_modal")
     |> TodoListWeb.CoreComponents.show_modal("create_modal")
+  end
+
+  @impl true
+  def mount(_params, _session, socket) do
+    if connected?(socket), do: TodoListWeb.Endpoint.subscribe(@todo_list_topic)
+
+    default_assigns = %{
+      tasks: TaskList.list_tasks,
+      edit_form: Phoenix.Component.to_form(TaskList.create_changeset(%{})),
+      create_form: Phoenix.Component.to_form(TaskList.create_changeset(%{})),
+      filter_form: Phoenix.Component.to_form(%{})
+    }
+
+    {:ok, socket
+      |> assign(default_assigns)
+      |> allow_upload(:documents, accept: ~w(.pdf .doc .docx), max_entries: 5)}
   end
 
   @impl true
@@ -92,6 +93,7 @@ defmodule TodoListWeb.TodoListLive do
     end
   end
 
+  @impl true
   def handle_event("open_create_modal", _, socket) do
     new_assigns = %{
       create_form: Phoenix.Component.to_form(TaskList.create_changeset(%{}))
@@ -100,6 +102,7 @@ defmodule TodoListWeb.TodoListLive do
     {:noreply, assign(socket, new_assigns)}
   end
 
+  @impl true
   def handle_event("create_task", %{"task" => task}, socket) do
     uploaded_docs = handle_documents(socket)
 
@@ -139,11 +142,13 @@ defmodule TodoListWeb.TodoListLive do
     {:noreply, cancel_upload(socket, :documents, ref)}
   end
 
+  @impl true
   def handle_event("filter_by_priority", %{"priority" => "All"}, socket) do
     tasks = TaskList.list_tasks()
     {:noreply, assign(socket, tasks: tasks)}
   end
 
+  @impl true
   def handle_event("filter_by_priority", %{"priority" => priority}, socket) do
     tasks = TaskList.lists_tasks_by_priority(priority)
     {:noreply, assign(socket, tasks: tasks)}

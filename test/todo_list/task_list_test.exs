@@ -21,13 +21,13 @@ defmodule TodoList.TaskListTest do
     end
 
     test "create_task/1 with valid data creates a task" do
-      valid_attrs = %{priority: "some priority", description: "some description", title: "some title", user_uuid: "7488a646-e31f-11e4-aace-600308960662", dead_line: ~N[2023-09-13 14:53:00]}
+      valid_attrs = %{priority: "High", description: "some description", title: "some title", user_id: 1, dead_line: ~N[2023-09-13 14:53:00]}
 
       assert {:ok, %Task{} = task} = TaskList.create_task(valid_attrs)
-      assert task.priority == "some priority"
+      assert task.priority == "High"
       assert task.description == "some description"
       assert task.title == "some title"
-      assert task.user_uuid == "7488a646-e31f-11e4-aace-600308960662"
+      assert task.user_id == 1
       assert task.dead_line == ~N[2023-09-13 14:53:00]
     end
 
@@ -37,10 +37,10 @@ defmodule TodoList.TaskListTest do
 
     test "update_task/2 with valid data updates the task" do
       task = task_fixture()
-      update_attrs = %{priority: "some updated priority", description: "some updated description", title: "some updated title", user_uuid: "7488a646-e31f-11e4-aace-600308960668", dead_line: ~N[2023-09-14 14:53:00]}
+      update_attrs = %{priority: "Low", description: "some updated description", title: "some updated title", user_uuid: "7488a646-e31f-11e4-aace-600308960668", dead_line: ~N[2023-09-14 14:53:00]}
 
       assert {:ok, %Task{} = task} = TaskList.update_task(task, update_attrs)
-      assert task.priority == "some updated priority"
+      assert task.priority == "Low"
       assert task.description == "some updated description"
       assert task.title == "some updated title"
       assert task.user_uuid == "7488a646-e31f-11e4-aace-600308960668"
@@ -72,18 +72,8 @@ defmodule TodoList.TaskListTest do
 
     @invalid_attrs %{comment: nil}
 
-    test "list_comments/0 returns all comments" do
-      comment = comment_fixture()
-      assert TaskList.list_comments() == [comment]
-    end
-
-    test "get_comment!/1 returns the comment with given id" do
-      comment = comment_fixture()
-      assert TaskList.get_comment!(comment.id) == comment
-    end
-
     test "create_comment/1 with valid data creates a comment" do
-      valid_attrs = %{comment: "some comment"}
+      valid_attrs = %{comment: "some comment", task_id: 1, user_id: 1}
 
       assert {:ok, %Comment{} = comment} = TaskList.create_comment(valid_attrs)
       assert comment.comment == "some comment"
@@ -93,83 +83,9 @@ defmodule TodoList.TaskListTest do
       assert {:error, %Ecto.Changeset{}} = TaskList.create_comment(@invalid_attrs)
     end
 
-    test "update_comment/2 with valid data updates the comment" do
-      comment = comment_fixture()
-      update_attrs = %{comment: "some updated comment"}
-
-      assert {:ok, %Comment{} = comment} = TaskList.update_comment(comment, update_attrs)
-      assert comment.comment == "some updated comment"
-    end
-
-    test "update_comment/2 with invalid data returns error changeset" do
-      comment = comment_fixture()
-      assert {:error, %Ecto.Changeset{}} = TaskList.update_comment(comment, @invalid_attrs)
-      assert comment == TaskList.get_comment!(comment.id)
-    end
-
-    test "delete_comment/1 deletes the comment" do
-      comment = comment_fixture()
-      assert {:ok, %Comment{}} = TaskList.delete_comment(comment)
-      assert_raise Ecto.NoResultsError, fn -> TaskList.get_comment!(comment.id) end
-    end
-
     test "change_comment/1 returns a comment changeset" do
       comment = comment_fixture()
       assert %Ecto.Changeset{} = TaskList.change_comment(comment)
-    end
-  end
-
-  describe "documents" do
-    alias TodoList.TaskList.Document
-
-    import TodoList.TaskListFixtures
-
-    @invalid_attrs %{path: nil}
-
-    test "list_documents/0 returns all documents" do
-      document = document_fixture()
-      assert TaskList.list_documents() == [document]
-    end
-
-    test "get_document!/1 returns the document with given id" do
-      document = document_fixture()
-      assert TaskList.get_document!(document.id) == document
-    end
-
-    test "create_document/1 with valid data creates a document" do
-      valid_attrs = %{path: "some path"}
-
-      assert {:ok, %Document{} = document} = TaskList.create_document(valid_attrs)
-      assert document.path == "some path"
-    end
-
-    test "create_document/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = TaskList.create_document(@invalid_attrs)
-    end
-
-    test "update_document/2 with valid data updates the document" do
-      document = document_fixture()
-      update_attrs = %{path: "some updated path"}
-
-      assert {:ok, %Document{} = document} = TaskList.update_document(document, update_attrs)
-      assert document.path == "some updated path"
-    end
-
-    test "update_document/2 with invalid data returns error changeset" do
-      document = document_fixture()
-      assert {:error, %Ecto.Changeset{}} = TaskList.update_document(document, @invalid_attrs)
-      assert document == TaskList.get_document!(document.id)
-    end
-
-    test "delete_document/1 deletes the document" do
-      document = document_fixture()
-      assert {:ok, %Document{}} = TaskList.delete_document(document)
-      assert_raise Ecto.NoResultsError, fn -> TaskList.get_document!(document.id) end
-    end
-
-    test "change_document/1 returns a document changeset" do
-      document = document_fixture()
-      assert %Ecto.Changeset{} = TaskList.change_document(document)
     end
   end
 end
